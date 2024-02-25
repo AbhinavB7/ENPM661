@@ -86,6 +86,21 @@ def find_path(node_list, goal):
 
 # //////////////////////////////////////////////////////////////////////////
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # store all the info about node index, parent, and state in the NodesInfo.txt file
 
 class Node:
@@ -94,14 +109,30 @@ class Node:
         self.parent = parent
         self.state = state
         
-# store all the explored states in Nodes.txt file
+# store all the explored states in a list to Nodes.txt file
 
 def store_nodes(node_list):
     with open('Nodes.txt', 'w') as f:
         for node in node_list:
-            f.write(f'{node.node_id} {node.parent} {node.state}\n')
+            f.write(f'{node.state}\n')
             
-# store the path from the initial state to the goal state in nodePath.txt file
+# store all the information about the node index, parent node index, and node in NodesInfo.txt file
+
+def store_nodes_info(node_list):
+    with open('NodesInfo.txt', 'w') as f:
+        for node in node_list:
+            f.write(f'{node.node_id} {node.parent} {node.state}\n')
+
+# store the order of the states from start node to the goal node in nodePath.txt file
+
+def store_path(node_list):
+    with open('nodePath.txt', 'w') as f:
+        path = find_path(node_list, goal_state)
+        for node in path:
+            f.write(f'{node}\n')
+            
+
+
 
 # node index is the index of the current node in the node_list
 # parent is the index of the parent node in the node_list
