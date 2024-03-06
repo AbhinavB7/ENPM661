@@ -2,7 +2,7 @@
 import numpy as np
 import cv2
 import math
-from google.colab.patches import cv2_imshow
+# from google.colab.patches import cv2_imshow
 
 # Defining the clearance (clearance = 5)
 clr = 5
@@ -84,11 +84,11 @@ obstacle_map = Obstacles(canvas.copy())
 # Inital and Goal Nodes 
 
 while True:
-  start_x = int(input("Enter end point, x (6-595): "))
-  start_y = int(input("Enter end point, y (6-245): "))
+  start_x = int(input("Enter start point, x (6-1195): "))
+  start_y = int(input("Enter start point, y (6-495): "))
   start_node = [start_x, start_y]
 
-  if start_node[0] < 0 or start_node[0] >= width or start_node[1] < 0 or start_node[1] >= height:
+  if start_node[0] < 6 or start_node[0] >= width or start_node[1] < 6 or start_node[1] >= height:
       print("Out of canvas!!! Provide new coordinates!!")
   elif ((obstacle_map[499 - start_node[1], start_node[0]])).all() or ((obstacle_map[499 - start_node[1], start_node[0]]) == cyan).all():
       print("Obstacle !!! Provide new coordinates!!")
@@ -96,11 +96,11 @@ while True:
       break
 
 while True:
-  goal_x = int(input("Enter end point, x (6-595): "))
-  goal_y = int(input("Enter end point, y (6-245): "))
+  goal_x = int(input("Enter end point, x (6-1195): "))
+  goal_y = int(input("Enter end point, y (6-495): "))
   goal_node = [goal_x, goal_y]
 
-  if goal_node[0] < 0 or goal_node[0] >= width or goal_node[1] < 0 or goal_node[1] >= height:
+  if goal_node[0] < 6 or goal_node[0] >= width or goal_node[1] < 6 or goal_node[1] >= height:
       print("Out of canvas!!! Provide new coordinates!!")
   elif ((obstacle_map[499 - goal_node[1], goal_node[0]])).all() or ((obstacle_map[499 - goal_node[1], goal_node[0]]) == cyan).all():
       print("Obstacle !!! Provide new coordinates!!")
