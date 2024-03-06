@@ -8,7 +8,7 @@ from google.colab.patches import cv2_imshow
 clr = 5
 
 # Defining the size of canvas
-w, h = 1200, 500
+width, height = 1200, 500
 
 # Defining different colors to illustrate obstacles
 cyan = [185, 0, 2]
@@ -40,7 +40,7 @@ def Obstacles(obs):
     cv2.fillPoly(obs, [np.array(hexagon_vertices1)], cyan)
 
     rect_inside = [
-        ((100 - clr, y - 100 + clr), (175 + clr, y - h)),
+        ((100 - clr, y - 100 + clr), (175 + clr, y - height)),
         ((275 - clr, y - 0), (350 + clr, y - 400 - clr)),
         ((980 - clr, y - 50 + clr), (1055 + clr, y - 450 - clr)),
         ((850 - clr, y - 50 + clr), (1055 + clr, y - 125 - clr)),
@@ -48,7 +48,7 @@ def Obstacles(obs):
     ]
 
     rect_outside = [
-        ((100, y - 100), (175, y - h)),
+        ((100, y - 100), (175, y - height)),
         ((275, y - 0), (350, y - 400)),
         ((980, y - 50), (1055, y - 450)),
         ((850, y - 50), (1055, y - 125)),
@@ -70,10 +70,42 @@ def Obstacles(obs):
     return obs
 
 # Initialize canvas
-canvas = np.zeros((h, w, 3), dtype=np.uint8)
+canvas = np.zeros((height, width, 3), dtype=np.uint8)
 
 # Call Obstacles function to populate the canvas
 obstacle_map = Obstacles(canvas.copy())
 
 # Display the map
-cv2_imshow(obstacle_map)
+# cv2_imshow(obstacle_map)
+
+
+# //////////////////////////////////////////////////////////////////////
+
+# Inital and Goal Nodes 
+
+while True:
+  start_x = int(input("Enter end point, x (6-595): "))
+  start_y = int(input("Enter end point, y (6-245): "))
+  start_node = [start_x, start_y]
+
+  if start_node[0] < 0 or start_node[0] >= width or start_node[1] < 0 or start_node[1] >= height:
+      print("Out of canvas!!! Provide new coordinates!!")
+  elif ((obstacle_map[499 - start_node[1], start_node[0]])).all() or ((obstacle_map[499 - start_node[1], start_node[0]]) == cyan).all():
+      print("Obstacle !!! Provide new coordinates!!")
+  else:
+      break
+
+while True:
+  goal_x = int(input("Enter end point, x (6-595): "))
+  goal_y = int(input("Enter end point, y (6-245): "))
+  goal_node = [goal_x, goal_y]
+
+  if goal_node[0] < 0 or goal_node[0] >= width or goal_node[1] < 0 or goal_node[1] >= height:
+      print("Out of canvas!!! Provide new coordinates!!")
+  elif ((obstacle_map[499 - goal_node[1], goal_node[0]])).all() or ((obstacle_map[499 - goal_node[1], goal_node[0]]) == cyan).all():
+      print("Obstacle !!! Provide new coordinates!!")
+  else:
+      break
+  
+  
+  # //////////////////////////////////////////////////////////////////////
