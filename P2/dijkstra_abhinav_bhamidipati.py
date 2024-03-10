@@ -2,6 +2,9 @@
 import numpy as np
 import cv2
 import math
+import heapq
+import time
+import matplotlib.pyplot as plt
 # from google.colab.patches import cv2_imshow
 
 # Defining the clearance (clearance = 5)
@@ -86,7 +89,7 @@ obstacle_map = Obstacles(canvas.copy())
 while True:
   start_x = int(input("Enter start point, x (6-1195): "))
   start_y = int(input("Enter start point, y (6-495): "))
-  start_node = [start_x, start_y]
+  start_node = (start_x, start_y)
 
   if start_node[0] < 6 or start_node[0] >= width or start_node[1] < 6 or start_node[1] >= height:
       print("Out of canvas!!! Provide new coordinates!!")
@@ -98,7 +101,7 @@ while True:
 while True:
   goal_x = int(input("Enter end point, x (6-1195): "))
   goal_y = int(input("Enter end point, y (6-495): "))
-  goal_node = [goal_x, goal_y]
+  goal_node = (goal_x, goal_y)
 
   if goal_node[0] < 6 or goal_node[0] >= width or goal_node[1] < 6 or goal_node[1] >= height:
       print("Out of canvas!!! Provide new coordinates!!")
@@ -109,3 +112,71 @@ while True:
   
   
   # //////////////////////////////////////////////////////////////////////
+  
+
+
+# Function to calculate the Euclidean distance between two points
+def distance(node1, node2):
+    return math.sqrt((node1[0] - node2[0]) ** 2 + (node1[1] - node2[1]) ** 2)
+
+# Function to perform Dijkstra's algorithm
+def dijkstra(start, goal, obstacle_map):
+    start_time = time.time()
+
+    # Initialize distance and visited dictionaries
+    distance_dict = {start: 0}
+    visited = set()
+
+    # Initialize priority queue
+    priority_queue = [(0, start)]
+
+    # Initialize predecessor dictionary to store the path
+    predecessor = {}
+
+    while priority_queue:
+        # Pop the node with the minimum distance
+        current_distance, current_node = heapq.heappop(priority_queue)
+
+        # If the current node is the goal, break
+        if current_node == goal:
+            break
+
+        # Skip if the node is already visited
+        if current_node in visited:
+            continue
+
+        # Mark current node as visited
+        visited.add(current_node)
+
+        # Get neighbors of the current node
+        neighbors = []
+        for i in range(-clr, clr + 1):
+            for j in range(-clr, clr + 1):
+                if i == 0 and j == 0:
+                    continue
+                neighbor = (current_node[0] + i, current_node[1] + j)
+                if 0 <= neighbor[0] < width and 0 <= neighbor[1] < height and obstacle_map[height - neighbor[1] - 1, neighbor[0]].tolist() != blue:
+                    neighbors.append(neighbor)
+
+        # Update distances to neighbors
+        for neighbor in neighbors:
+            new_distance = distance_dict[current_node] + distance(current_node, neighbor)
+            if neighbor not in distance_dict or new_distance < distance_dict[neighbor]:
+                distance_dict[neighbor] = new_distance
+                heapq.heappush(priority_queue, (new_distance, neighbor))
+                predecessor[neighbor] = current_node
+
+    # Generate path
+    path = []
+    current = goal
+    while current != start:
+        path.append(current)
+        current = predecessor[current]
+    path.append(start)
+    path.reverse()
+
+    # Measure time taken
+    end_time = time.time()
+    time_taken = end_time - start_time
+
+    return path, time_taken
