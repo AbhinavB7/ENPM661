@@ -112,12 +112,50 @@ while True:
   
   
   # //////////////////////////////////////////////////////////////////////
-  
 
+# Function to move up
+def move_up(node):
+    return node[0], node[1] + 1
 
-# Function to calculate the Euclidean distance between two points
-def distance(node1, node2):
-    return math.sqrt((node1[0] - node2[0]) ** 2 + (node1[1] - node2[1]) ** 2)
+# Function to move down
+def move_down(node):
+    return node[0], node[1] - 1
+
+# Function to move right
+def move_right(node):
+    return node[0] + 1, node[1]
+
+# Function to move left
+def move_left(node):
+    return node[0] - 1, node[1]
+
+# Function to move up-right (diagonal)
+def move_up_right(node):
+    return node[0] + 1, node[1] + 1
+
+# Function to move down-right (diagonal)
+def move_down_right(node):
+    return node[0] + 1, node[1] - 1
+
+# Function to move up-left (diagonal)
+def move_up_left(node):
+    return node[0] - 1, node[1] + 1
+
+# Function to move down-left (diagonal)
+def move_down_left(node):
+    return node[0] - 1, node[1] - 1
+
+# Define the action set with corresponding functions
+actions = {
+    move_up: 1,
+    move_down: 1,
+    move_right: 1,
+    move_left: 1,
+    move_up_right: 1.4,
+    move_down_right: 1.4,
+    move_up_left: 1.4,
+    move_down_left: 1.4
+}
 
 # Function to perform Dijkstra's algorithm
 def dijkstra(start, goal, obstacle_map):
@@ -150,33 +188,39 @@ def dijkstra(start, goal, obstacle_map):
 
         # Get neighbors of the current node
         neighbors = []
-        for i in range(-clr, clr + 1):
-            for j in range(-clr, clr + 1):
-                if i == 0 and j == 0:
-                    continue
-                neighbor = (current_node[0] + i, current_node[1] + j)
-                if 0 <= neighbor[0] < width and 0 <= neighbor[1] < height and obstacle_map[height - neighbor[1] - 1, neighbor[0]].tolist() != blue:
-                    neighbors.append(neighbor)
+        for action, cost in actions.items():
+            neighbor = action(current_node)
+            if 0 <= neighbor[0] < width and 0 <= neighbor[1] < height and obstacle_map[height - neighbor[1] - 1, neighbor[0]].tolist() != blue:
+                neighbors.append((neighbor, cost))
 
         # Update distances to neighbors
-        for neighbor in neighbors:
-            new_distance = distance_dict[current_node] + distance(current_node, neighbor)
+        for neighbor, action_cost in neighbors:
+            new_distance = distance_dict[current_node] + action_cost
             if neighbor not in distance_dict or new_distance < distance_dict[neighbor]:
                 distance_dict[neighbor] = new_distance
                 heapq.heappush(priority_queue, (new_distance, neighbor))
                 predecessor[neighbor] = current_node
 
-    # Generate path
-    path = []
-    current = goal
-    while current != start:
-        path.append(current)
-        current = predecessor[current]
-    path.append(start)
-    path.reverse()
-
     # Measure time taken
     end_time = time.time()
     time_taken = end_time - start_time
 
-    return path, time_taken
+    return goal, time_taken, predecessor
+
+# Function to visualize the exploration process and final path
+def visualize_path(obstacle_map, path):
+    vis_map = obstacle_map.copy()
+    for node in path:
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Adjusting for top-left origin
+    plt.imshow(cv2.cvtColor(vis_map, cv2.COLOR_BGR2RGB))
+    plt.title("Exploration Process and Final Path")
+    plt.axis('off')
+    plt.show()
+    
+# Call Dijkstra's algorithm
+path, time_taken = dijkstra(start_node, goal_node, obstacle_map)
+
+# Visualize path
+visualize_path(obstacle_map, path)
+
+print("Time taken:", time_taken, "seconds")
