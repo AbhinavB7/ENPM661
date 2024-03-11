@@ -28,7 +28,6 @@ def Obstacles(obs):
         hexagon_x = int(center[0] + hexagon_side_length * math.cos(angle_rad))
         hexagon_y = int(center[1] + hexagon_side_length * math.sin(angle_rad))
         hexagon_vertices.append((hexagon_x, hexagon_y))
-        print(hexagon_vertices)
 
     # Fill the larger hexagon
     cv2.fillPoly(obs, [np.array(hexagon_vertices)], blue)
