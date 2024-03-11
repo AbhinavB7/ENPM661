@@ -5,7 +5,6 @@ import math
 import heapq
 import time
 import matplotlib.pyplot as plt
-# from google.colab.patches import cv2_imshow
 
 # Defining the clearance (clearance = 5)
 clr = 5
@@ -21,7 +20,7 @@ blue = [255, 125, 0]
 def Obstacles(obs):
     center = (650, 250)
     hexagon_side_length = 150
-    y = 500
+    y = 500 
 
     hexagon_vertices = []
     for i in range(6):
@@ -29,6 +28,7 @@ def Obstacles(obs):
         hexagon_x = int(center[0] + hexagon_side_length * math.cos(angle_rad))
         hexagon_y = int(center[1] + hexagon_side_length * math.sin(angle_rad))
         hexagon_vertices.append((hexagon_x, hexagon_y))
+        print(hexagon_vertices)
 
     # Fill the larger hexagon
     cv2.fillPoly(obs, [np.array(hexagon_vertices)], blue)
@@ -78,41 +78,6 @@ canvas = np.zeros((height, width, 3), dtype=np.uint8)
 # Call Obstacles function to populate the canvas
 obstacle_map = Obstacles(canvas.copy())
 
-# Display the map
-# cv2_imshow(obstacle_map)
-
-
-# //////////////////////////////////////////////////////////////////////
-
-# Inital and Goal Nodes 
-
-while True:
-  start_x = int(input("Enter start point, x (6-1195): "))
-  start_y = int(input("Enter start point, y (6-495): "))
-  start_node = (start_x, start_y)
-
-  if start_node[0] < 6 or start_node[0] >= width or start_node[1] < 6 or start_node[1] >= height:
-      print("Out of canvas!!! Provide new coordinates!!")
-  elif ((obstacle_map[499 - start_node[1], start_node[0]])).all() or ((obstacle_map[499 - start_node[1], start_node[0]]) == cyan).all():
-      print("Obstacle !!! Provide new coordinates!!")
-  else:
-      break
-
-while True:
-  goal_x = int(input("Enter end point, x (6-1195): "))
-  goal_y = int(input("Enter end point, y (6-495): "))
-  goal_node = (goal_x, goal_y)
-
-  if goal_node[0] < 6 or goal_node[0] >= width or goal_node[1] < 6 or goal_node[1] >= height:
-      print("Out of canvas!!! Provide new coordinates!!")
-  elif ((obstacle_map[499 - goal_node[1], goal_node[0]])).all() or ((obstacle_map[499 - goal_node[1], goal_node[0]]) == cyan).all():
-      print("Obstacle !!! Provide new coordinates!!")
-  else:
-      break
-  
-  
-  # //////////////////////////////////////////////////////////////////////
-
 # Function to move up
 def move_up(node):
     return node[0], node[1] + 1
@@ -157,17 +122,37 @@ actions = {
     move_down_left: 1.4
 }
 
+# Initialize start and goal nodes
+while True:
+    start_x = int(input("Enter start point, x (6-1194): "))
+    start_y = int(input("Enter start point, y (6-494): "))
+    start_node = (start_x, start_y)
+
+    if start_node[0] < 6 or start_node[0] >= width or start_node[1] < 6 or start_node[1] >= height:
+        print("Out of canvas!!! Provide new coordinates!!")
+    elif ((obstacle_map[499 - start_node[1], start_node[0]])).all() or ((obstacle_map[499 - start_node[1], start_node[0]]) == cyan).all():
+        print("Obstacle !!! Provide new coordinates!!")
+    else:
+        break
+
+while True:
+    goal_x = int(input("Enter end point, x (6-1194): "))
+    goal_y = int(input("Enter end point, y (6-494): "))
+    goal_node = (goal_x, goal_y)
+
+    if goal_node[0] < 6 or goal_node[0] >= width or goal_node[1] < 6 or goal_node[1] >= height:
+        print("Out of canvas!!! Provide new coordinates!!")
+    elif ((obstacle_map[499 - goal_node[1], goal_node[0]])).all() or ((obstacle_map[499 - goal_node[1], goal_node[0]]) == cyan).all():
+        print("Obstacle !!! Provide new coordinates!!")
+    else:
+        break
+
 # Function to perform Dijkstra's algorithm
 def dijkstra(start, goal, obstacle_map):
     start_time = time.time()
-
-    # Initialize distance and visited dictionaries
     distance_dict = {start: 0}
     visited = set()
-
-    # Initialize priority queue
     priority_queue = [(0, start)]
-
     # Initialize predecessor dictionary to store the path
     predecessor = {}
 
@@ -191,8 +176,9 @@ def dijkstra(start, goal, obstacle_map):
         for action, cost in actions.items():
             neighbor = action(current_node)
             if 0 <= neighbor[0] < width and 0 <= neighbor[1] < height and obstacle_map[height - neighbor[1] - 1, neighbor[0]].tolist() != blue:
+                canvas[height - neighbor[1] - 1, neighbor[0]] = (0, 255, 0)  # Change color of explored node
                 neighbors.append((neighbor, cost))
-
+                
         # Update distances to neighbors
         for neighbor, action_cost in neighbors:
             new_distance = distance_dict[current_node] + action_cost
@@ -229,17 +215,16 @@ def visualize_path(obstacle_map, goal_node, optimal_path):
     
     # Visualize final path
     for node in optimal_path:
-        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Final path in green
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  
     
     # Visualize start and goal nodes
-    cv2.circle(vis_map, (start_node[0], height - start_node[1]), 5, (0, 0, 255), -1)  # Start node in blue
-    cv2.circle(vis_map, (goal_node[0], height - goal_node[1]), 5, (255, 0, 255), -1)  # Goal node in magenta
+    cv2.circle(vis_map, (start_node[0], height - start_node[1]), 5, (0, 0, 255), -1) 
+    cv2.circle(vis_map, (goal_node[0], height - goal_node[1]), 5, (255, 0, 255), -1) 
     
     plt.imshow(cv2.cvtColor(vis_map, cv2.COLOR_BGR2RGB))
     plt.title("Exploration Process and Final Path")
     plt.axis('off')
     plt.show()
-
 
 # Call Dijkstra's algorithm
 goal_node, time_taken, predecessor = dijkstra(start_node, goal_node, obstacle_map)
@@ -261,14 +246,12 @@ optimal_path_cost = calculate_path_cost(optimal_path, actions)
 visualize_path(obstacle_map, goal_node, optimal_path)
 
 print("Time taken:", time_taken, "seconds")
-print("Final cost of the optimal path:", optimal_path_cost)
-
-import cv2
+# print("Final cost of the optimal path:", optimal_path_cost)
 
 # Function to create a video of the exploration process and final path
-def create_video(obstacle_map, goal_node, predecessor, optimal_path):
+def create_video(obstacle_map, start_node, goal_node, predecessor, optimal_path):
     vis_map = obstacle_map.copy()
-    out = cv2.VideoWriter('path_visualization.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (width, height))
+    out = cv2.VideoWriter('path_visualization.avi', cv2.VideoWriter_fourcc(*'DIVX'), 1000, (width, height))
     
     visited_nodes = set()
     
@@ -279,12 +262,9 @@ def create_video(obstacle_map, goal_node, predecessor, optimal_path):
             visited_nodes.add(predecessor[current_node])
             current_node = predecessor[current_node]
     
-    for node in visited_nodes:
-        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Visited nodes in red
-        out.write(vis_map)
-    
+    # Visualize final path
     for node in optimal_path:
-        cv2.circle(vis_map, (node[0], height - node[1]), 3, (255, 255, 255), -1)  # Final path in green
+        cv2.circle(vis_map, (node[0], height - node[1]), 2, (255, 255, 255), 1)  # Final path in green
         out.write(vis_map)
     
     # Visualize start and goal nodes
@@ -296,4 +276,5 @@ def create_video(obstacle_map, goal_node, predecessor, optimal_path):
     cv2.destroyAllWindows()
 
 # Create a video of the exploration process and final path
-create_video(obstacle_map, goal_node, predecessor, optimal_path)
+create_video(obstacle_map, start_node, goal_node, predecessor, optimal_path)
+
