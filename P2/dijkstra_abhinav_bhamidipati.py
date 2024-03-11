@@ -207,20 +207,93 @@ def dijkstra(start, goal, obstacle_map):
 
     return goal, time_taken, predecessor
 
+# Function to backtrack and find the optimal path
+def backtrack_path(start, goal, predecessor):
+    current = goal
+    path = [current]
+    while current != start:
+        if current not in predecessor:
+            print("No path found!")
+            return []
+        current = predecessor[current]
+        path.append(current)
+    return path[::-1]
+
 # Function to visualize the exploration process and final path
-def visualize_path(obstacle_map, path):
+def visualize_path(obstacle_map, goal_node, optimal_path):
     vis_map = obstacle_map.copy()
-    for node in path:
-        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Adjusting for top-left origin
+    
+    # Visualize exploration path
+    for node in optimal_path[:-1]:
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (255, 0, 0), -1)  # Exploration path in red
+    
+    # Visualize final path
+    for node in optimal_path:
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Final path in green
+    
+    # Visualize start and goal nodes
+    cv2.circle(vis_map, (start_node[0], height - start_node[1]), 5, (0, 0, 255), -1)  # Start node in blue
+    cv2.circle(vis_map, (goal_node[0], height - goal_node[1]), 5, (255, 0, 255), -1)  # Goal node in magenta
+    
     plt.imshow(cv2.cvtColor(vis_map, cv2.COLOR_BGR2RGB))
     plt.title("Exploration Process and Final Path")
     plt.axis('off')
     plt.show()
-    
-# Call Dijkstra's algorithm
-path, time_taken = dijkstra(start_node, goal_node, obstacle_map)
 
-# Visualize path
-visualize_path(obstacle_map, path)
+
+# Call Dijkstra's algorithm
+goal_node, time_taken, predecessor = dijkstra(start_node, goal_node, obstacle_map)
+
+# Backtrack and find optimal path
+optimal_path = backtrack_path(start_node, goal_node, predecessor)
+
+# Function to calculate the total cost of the path
+def calculate_path_cost(path, actions):
+    total_cost = 0
+    for i in range(len(path) - 1):
+        action = (path[i+1][0] - path[i][0], path[i+1][1] - path[i][1])
+        total_cost += actions.get(action, 1)  # Use get method to handle missing keys
+    return total_cost
+
+optimal_path_cost = calculate_path_cost(optimal_path, actions)
+
+# Visualize exploration process and optimal path
+visualize_path(obstacle_map, goal_node, optimal_path)
 
 print("Time taken:", time_taken, "seconds")
+print("Final cost of the optimal path:", optimal_path_cost)
+
+import cv2
+
+# Function to create a video of the exploration process and final path
+def create_video(obstacle_map, goal_node, predecessor, optimal_path):
+    vis_map = obstacle_map.copy()
+    out = cv2.VideoWriter('path_visualization.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (width, height))
+    
+    visited_nodes = set()
+    
+    for node in predecessor.keys():
+        visited_nodes.add(node)
+        current_node = node
+        while current_node in predecessor:
+            visited_nodes.add(predecessor[current_node])
+            current_node = predecessor[current_node]
+    
+    for node in visited_nodes:
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (0, 255, 0), -1)  # Visited nodes in red
+        out.write(vis_map)
+    
+    for node in optimal_path:
+        cv2.circle(vis_map, (node[0], height - node[1]), 3, (255, 255, 255), -1)  # Final path in green
+        out.write(vis_map)
+    
+    # Visualize start and goal nodes
+    cv2.circle(vis_map, (start_node[0], height - start_node[1]), 5, (0, 0, 255), -1)  # Start node in blue
+    cv2.circle(vis_map, (goal_node[0], height - goal_node[1]), 5, (255, 0, 255), -1)  # Goal node in magenta
+    out.write(vis_map)
+
+    out.release()
+    cv2.destroyAllWindows()
+
+# Create a video of the exploration process and final path
+create_video(obstacle_map, goal_node, predecessor, optimal_path)
