@@ -7,7 +7,7 @@ numpy, cv2, math, heapq, time, matplotlib.pyplot
 
 
 Steps to Run the code:
-1. Run the given code.
+1. Run the given .py file.
 2. Enter the x and y coordinates of the start and goal node one by one.
 3. You will get the Time Taken to find the optimal path in seconds.
 4. The video will get saved in the background with Node exploration and Optimal path.
